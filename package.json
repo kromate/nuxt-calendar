@@ -1,6 +1,6 @@
 {
   "name": "nuxt-calender",
-  "version": "0.0.5",
+  "version": "0.0.8",
   "description": "Nuxt calendar module built using wc-calendar as base",
   "license": "MIT",
   "type": "module",

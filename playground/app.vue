@@ -1,7 +1,6 @@
 <template>
-  <div>
-    Nuxt module playground!
-    <NuxtCalendar class='tex' :range='true'/>
+  <div class='tex'>
+    <NuxtCalendar :range='true'/>
   </div>
 </template>
 
@@ -10,6 +9,6 @@
 
 <style>
 .tex {
-  width: 40rem;
+  width: 12rem;
 }
 </style>
