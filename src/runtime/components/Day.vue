@@ -61,7 +61,6 @@ export default {
     return {
       toolTip: false,
       onNumber: false
-      // toolTipTxt
     }
   },
   computed: {
@@ -244,12 +243,14 @@ export default {
     dayMouseOver() {
       this.$emit('dayMouseOver', this.day.date)
     },
-    hasSlot(name = 'default') {
-      return (
-        !!this.$parent.$parent.$slots[name] ||
-        !!this.$parent.$parent.$scopedSlots[name]
-      )
-    },
+    // hasSlot(name = 'default')
+    // {
+    //   console.log(this.$parent.$parent.$slots[name]);
+    //   return (
+    //     !!this.$parent.$parent.$slots[name] ||
+    //     !!this.$parent.$parent.$scopedSlots[name]
+    //   )
+    // },
     isDisabledDate(date) {
       const datesCollection = this.fConfigs.disabledDates
 
@@ -282,7 +283,7 @@ export default {
     getClassNames(day) {
       let classes = []
 
-      if (!this.hasSlot('default') || this.alwaysUseDefaultClasses) {
+      if (this.alwaysUseDefaultClasses) {
         classes.push('vfc-span-day')
       }
 

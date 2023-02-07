@@ -1,38 +1,40 @@
 <template>
-  <div ref="popoverElement" class="vfc-popover-container" tabindex="0">
+  <div class="vfc-popover-container" ref="popoverElement" tabindex="0">
     <PickerInputs
-      :f-configs="fConfigs"
-      :single-selected-date="singleSelectedDate"
+      :fConfigs="fConfigs"
+      :singleSelectedDate="singleSelectedDate"
       :calendar="calendar"
     >
-      <template #dateRangeInputs="props">
+      <template v-slot:dateRangeInputs="props">
         <slot
-          :start-date="props.startDate"
-          :end-date="props.endDate"
-          :is-typeable="fConfigs.isTypeable"
+          :startDate="props.startDate"
+          :endDate="props.endDate"
+          :isTypeable="fConfigs.isTypeable"
           name="dateRangeInputs"
-        />
+        >
+        </slot>
       </template>
-      <template #datePickerInput="props">
+      <template v-slot:datePickerInput="props">
         <slot
-          :selected-date="props.selectedDate"
-          :is-typeable="fConfigs.isTypeable"
+          :selectedDate="props.selectedDate"
+          :isTypeable="fConfigs.isTypeable"
           name="datePickerInput"
-        />
+        >
+        </slot>
       </template>
     </PickerInputs>
 
     <div
+      class="vfc-main-container"
       v-show="showCalendar"
       ref="mainContainer"
-      class="vfc-main-container"
       :class="{
         'vfc-modal':
           fConfigs.isModal &&
           (fConfigs.isDatePicker ||
             fConfigs.isDateRange ||
             fConfigs.isMultipleDatePicker),
-        'vfc-dark': fConfigs.isDark,
+        'vfc-dark': fConfigs.isDark
       }"
     >
       <time-picker
@@ -41,84 +43,85 @@
         :height="$refs.popoverElement.clientHeight"
         :hours="activeHours"
         :minutes="activeMinutes"
-      />
+      ></time-picker>
 
       <template v-else>
         <div class="vfc-calendars-container">
           <Arrows
-            :is-multiple="false"
-            :f-configs="fConfigs"
-            :allow-pre-date="allowPreDate"
-            :allow-next-date="allowNextDate"
+            :isMultiple="false"
+            :fConfigs="fConfigs"
+            :allowPreDate="allowPreDate"
+            :allowNextDate="allowNextDate"
           >
-            <template #navigationArrowLeft>
-              <slot name="navigationArrowLeft" />
+            <template v-slot:navigationArrowLeft>
+              <slot name="navigationArrowLeft"></slot>
             </template>
-            <template #navigationArrowRight>
-              <slot name="navigationArrowRight" />
+            <template v-slot:navigationArrowRight>
+              <slot name="navigationArrowRight"></slot>
             </template>
           </Arrows>
 
-          <div ref="calendars" class="vfc-calendars">
+          <div class="vfc-calendars" ref="calendars">
             <div
+              class="vfc-calendar"
               v-for="(calendarItem, key) in listCalendars"
               :key="calendarItem.key"
-              class="vfc-calendar"
             >
               <month-year-picker
+                ref="monthContainer"
+                :class="'vfc-' + fConfigs.titlePosition"
+                :changeYearStep="changeYearStep"
                 v-show="
                   showMonthPicker === key + 1 || showYearPicker === key + 1
                 "
-                ref="monthContainer"
-                :class="'vfc-' + fConfigs.titlePosition"
-                :change-year-step="changeYearStep"
                 :calendar-key="key"
-              />
+              >
+              </month-year-picker>
               <div class="vfc-content">
                 <Arrows
-                  :is-multiple="true"
-                  :f-configs="fConfigs"
-                  :allow-pre-date="allowPreDate"
-                  :allow-next-date="allowNextDate"
+                  :isMultiple="true"
+                  :fConfigs="fConfigs"
+                  :allowPreDate="allowPreDate"
+                  :allowNextDate="allowNextDate"
                   :calendar-key="key"
                 >
-                  <template #navigationArrowLeft>
-                    <slot name="navigationArrowLeft" />
+                  <template v-slot:navigationArrowLeft>
+                    <slot name="navigationArrowLeft"></slot>
                   </template>
-                  <template #navigationArrowRight>
-                    <slot name="navigationArrowRight" />
+                  <template v-slot:navigationArrowRight>
+                    <slot name="navigationArrowRight"></slot>
                   </template>
                 </Arrows>
 
                 <transition tag="div" :name="getTransition_()" appear>
                   <div
-                    v-if="checkHiddenElement('month')"
                     class="vfc-top-date"
                     :class="'vfc-' + fConfigs.titlePosition"
+                    v-if="checkHiddenElement('month')"
                   >
                     <span
+                      @click.prevent="
+                        isNotSeparatelyAndFirst(key) && openMonthPicker(key + 1)
+                      "
                       :class="{
                         'vfc-cursor-pointer vfc-underline':
                           fConfigs.changeMonthFunction &&
                           isNotSeparatelyAndFirst(key),
-                        'vfc-underline-active': showMonthPicker === key + 1,
+                        'vfc-underline-active': showMonthPicker === key + 1
                       }"
-                      @click.prevent="
-                        isNotSeparatelyAndFirst(key) && openMonthPicker(key + 1)
-                      "
                     >
                       {{ calendarItem.month }}</span
                     >
                     <span
+                      @click.prevent="
+                        isNotSeparatelyAndFirst(key) && openYearPicker(key + 1)
+                      "
                       :class="{
                         'vfc-cursor-pointer vfc-underline':
                           fConfigs.changeYearFunction &&
                           isNotSeparatelyAndFirst(key),
-                        'vfc-underline-active': showYearPicker === key + 1,
+                        'vfc-underline-active': showYearPicker === key + 1
                       }"
-                      @click.prevent="
-                        isNotSeparatelyAndFirst(key) && openYearPicker(key + 1)
-                      "
                     >
                       {{ calendarItem.year }}
                     </span>
@@ -126,7 +129,7 @@
                 </transition>
                 <transition tag="div" :name="getTransition_()" appear>
                   <div class="vfc-dayNames">
-                    <span v-if="fConfigs.showWeekNumbers" />
+                    <span v-if="fConfigs.showWeekNumbers"></span>
                     <span
                       v-for="(dayName, dayKey) in fConfigs.dayNames"
                       :key="key + dayKey + 1"
@@ -140,45 +143,45 @@
                 </transition>
                 <transition-group tag="div" :name="getTransition_()" appear>
                   <div
+                    class="vfc-week"
                     v-for="(week, week_key) in calendarItem.weeks"
                     :key="key + week_key + 1"
-                    class="vfc-week"
                   >
                     <WeekNumbers
                       v-if="showWeekNumbers"
                       :number="week.number"
-                      :border-color="borderColor"
+                      :borderColor="borderColor"
                     />
                     <Day
                       v-for="(day, day_key) in week.days"
                       ref="day"
                       :key="key + week_key + day_key + 1"
-                      :is-multiple-date-range="isMultipleDateRange"
+                      :isMultipleDateRange="isMultipleDateRange"
                       :day="day"
-                      :f-configs="fConfigs"
+                      :fConfigs="fConfigs"
                       :calendar="calendar"
-                      :help-calendar="helpCalendar"
+                      :helpCalendar="helpCalendar"
                       :week="week"
                       :day_key="day_key"
-                      :always-use-default-classes="alwaysUseDefaultClasses"
                       @dayMouseOver="dayMouseOver"
+                      :alwaysUseDefaultClasses="alwaysUseDefaultClasses"
                     >
-                      <template #default="props">
-                        <slot :week="props.week" :day="props.day" />
+                      <template v-slot:default="props">
+                        <slot :week="props.week" :day="props.day"></slot>
                       </template>
                     </Day>
                   </div>
                   <template
                     v-if="
                       calendarItem.weeks.length < 6 &&
-                      !fConfigs.isLayoutExpandable
+                        !fConfigs.isLayoutExpandable
                     "
                   >
                     <!-- stabilizator -->
                     <div
+                      style="height: 32.6px"
                       v-for="moreWeekKey in 6 - calendarItem.weeks.length"
                       :key="key + moreWeekKey + 'moreWeek'"
-                      style="height: 32.6px"
                     >
                       &nbsp;
                     </div>
@@ -187,8 +190,8 @@
               </div>
             </div>
           </div>
-          <CalendarFooter v-if="canClearRange || $slots['footer']">
-            <template #footer>
+          <Footer v-if="canClearRange || $slots['footer']">
+            <template v-slot:footer>
               <div @click="cleanRange">
                 <slot name="cleaner">
                   <div
@@ -198,532 +201,348 @@
                     <span
                       :class="[rangeIsSelected ? 'active' : 'disabled']"
                       @click="cleanRange"
-                      >Clear Range{{ isMultipleDateRange && "s" }}</span
+                      >Clear Range{{ isMultipleDateRange && 's' }}</span
                     >
                   </div>
                 </slot>
               </div>
-              <slot name="footer" />
+              <slot name="footer"></slot>
             </template>
             <!-- <span>&nbsp;</span> -->
-          </CalendarFooter>
+          </Footer>
         </div>
       </template>
     </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-import helpCalendarClass from "../assets/js/helpCalendar";
-import { propsAndData } from "../mixins/propsAndData";
-import TimePicker from "../components/TimePicker.vue";
-import Arrows from "../components/Arrows.vue";
-import WeekNumbers from "../components/WeekNumbers.vue";
-import Day from "../components/Day.vue";
-import MonthYearPicker from "../components/MonthYearPicker.vue";
-import PickerInputs from "../components/PickerInputs.vue";
-import CalendarFooter from "../components/Footer.vue";
-import { hElContains, hUniqueID } from "../utils/helpers";
-import {computed, ref, watch, onMounted, onUnmounted} from "vue";
+<script>
+import helpCalendarClass from '../assets/js/helpCalendar'
+import { propsAndData } from '../mixins/propsAndData'
+import TimePicker from '../components/TimePicker.vue'
+import Arrows from '../components/Arrows.vue'
+import WeekNumbers from '../components/WeekNumbers.vue'
+import Day from '../components/Day.vue'
+import MonthYearPicker from '../components/MonthYearPicker.vue'
+import PickerInputs from '../components/PickerInputs.vue'
+import Footer from '../components/Footer.vue'
 
-const emit = defineEmits(['dayClicked', 'selectedDaysCount', 'input', 'choseDay', 'closed', 'opened', 'changedYear', 'changedMonth'])
+import { hElContains, hUniqueID } from '../utils/helpers'
+// import calendarMethods from '../utils/calendarMethods'
 
-const props = defineProps({
-  activeHours: {
-    type: Array,
-    required: false,
+export default {
+  name: 'FunctionalCalendar',
+  components: {
+    MonthYearPicker,
+    TimePicker,
+    PickerInputs,
+    Arrows,
+    Footer,
+    Day,
+    WeekNumbers
   },
-  activeMinutes: {
-    type: Array,
-    required: false,
-  },
-  borderColor: {
-    type: String,
-    default: "",
-  },
-  displayTimeInput: {
-    type: Boolean,
-    default: false,
-  },
-  configs: {
-    type: Object,
-    default: () => {},
-  },
-  sundayStart: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  placeholder: {
-    type: [String, Boolean],
-    default: () => undefined,
-  },
-  dateFormat: {
-    type: String,
-    validator(format:any) {
-      let timeFormat = format.split(" ")[1];
-      if (!timeFormat) {
-        return true;
+  mixins: [propsAndData],
+  computed: {
+    startDMY() {
+      //start only with Day Month and Year
+      if (this.calendar.dateRange.start) {
+        return this.calendar.dateRange.start.split(' ')[0]
       }
-      const validFormats = ["HH:MM", "HH:mm", "hh:MM", "hh:mm"];
-      return !!~validFormats.indexOf(timeFormat);
+      return ''
     },
-  },
-  canClearRange: {
-    type: Boolean,
-    default: false,
-  },
-  isMultiple: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  isSeparately: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  isDatePicker: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  isMultipleDatePicker: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  isMultipleDateRange: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  isDateRange: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  withTimePicker: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  calendarsCount: {
-    type: Number,
-  },
-  isModal: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  isTypeable: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  changeMonthFunction: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  changeYearFunction: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  changeYearStep: {
-    type: Number,
-    default: () => 3,
-  },
-  changeMonthStep: {
-    type: Number,
-    default: () => 1,
-  },
-  newCurrentDate: {
-    type: Date,
-  },
-  markedDates: {
-    type: Array,
-    default: () => [],
-  },
-  markedDateRange: {
-    type: [Object, Array],
-  },
-  disabledDayNames: {
-    type: Array,
-  },
-  disabledDates: {
-    type: Array,
-    default: () => [],
-  },
-  enabledDates: {
-    type: Array,
-    default: () => [],
-  },
-  limits: {
-    type: [Object, Boolean],
-    default: () => undefined,
-  },
-  minSelDays: {
-    type: [Number, Boolean],
-    default: () => undefined,
-  },
-  maxSelDays: {
-    type: [Number, Boolean],
-    default: () => undefined,
-  },
-  dayNames: {
-    type: Array,
-  },
-  monthNames: {
-    type: Array,
-  },
-  shortMonthNames: {
-    type: Array,
-  },
-  showWeekNumbers: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  value: {
-    type: Object,
-  },
-  transition: {
-    type: Boolean,
-    default: () => undefined,
-  },
-  hiddenElements: {
-    type: Array,
-  },
-  isAutoCloseable: {
-    type: Boolean,
-    default: undefined,
-  },
-  isDark: {
-    type: Boolean,
-    default: undefined,
-  },
-  isLayoutExpandable: {
-    type: Boolean,
-    default: undefined,
-  },
-  titlePosition: {
-    type: String,
-    default: "center",
-  },
-  arrowsPosition: {
-    type: String,
-    default: "space-between",
-  },
-  alwaysUseDefaultClasses: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-const fConfigs = ref({
-  sundayStart: false,
-  placeholder: '',
-  dateFormat: "dd/mm/yyyy hh:MM",
-  isMultipleDateRange: false,
-  isDatePicker: false,
-  isMultipleDatePicker: false,
-  isDateRange: false,
-  withTimePicker: false,
-  isMultiple: false,
-  calendarsCount: 1,
-  isSeparately: false,
-
-  isModal: false,
-  isTypeable: false,
-
-  changeMonthFunction: false,
-  changeYearFunction: false,
-  changeYearStep: 3,
-
-  changeMonthStep: 1,
-
-  markedDates: [],
-  markedDateRange: {
-    start: false,
-    end: false,
-  },
-
-  limits: false,
-  minSelDays: false,
-  maxSelDays: false,
-
-  disabledDates: [],
-  enabledDates: [] as any,
-  disabledDayNames: [],
-
-  dayNames: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
-  monthNames: [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ],
-  shortMonthNames: [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ],
-
-  showWeekNumbers: false,
-  transition: true,
-  hiddenElements: [],
-  isAutoCloseable: false,
-  isDark: false,
-  isLayoutExpandable: false,
-
-  titlePosition: "center",
-  arrowsPosition: "space-between",
-});
-
-const calendar = ref({
-  currentDate: new Date(),
-  selectedDate: false,
-  selectedDateTime: false,
-  selectedHour: "00",
-  selectedMinute: "00",
-  selectedDatesItem: "",
-  selectedDates: [] as any,
-  dateRange: {
-    start: "",
-    end: "",
-  },
-  multipleDateRange: [],
-});
-
-const defaultDateFormat = ref({
-  date: false,
-  dateTime: false,
-  hour: "00",
-  minute: "00",
-});
-const popoverElement = ref<HTMLBaseElement>();
-const hoveredObject = ref(null);
-const transitionPrefix = ref("left");
-const showCalendar = ref(true);
-const showMonthPicker = ref();
-const showYearPicker = ref();
-const showTimePicker = ref(false);
-const allowPreDate = ref(true);
-const allowNextDate = ref(true);
-const listCalendars = ref([] as any);
-
-const startDMY = computed(() => {
-  if (calendar.value.dateRange.start) {
-    return calendar.value.dateRange.start.split(" ")[0];
-  }
-  return "";
-});
-
-const endDMY = computed(() => {
-  if (calendar.value.dateRange.end) {
-    return calendar.value.dateRange.end.split(" ")[0];
-  }
-  return "";
-});
-
-const rangeIsSelected = computed(() => {
-  if (!props.isMultipleDateRange) {
-    return !!(calendar.value.dateRange.end && calendar.value.dateRange.start);
-  }
-  return calendar.value.multipleDateRange.length > 0;
-});
-const helpCalendar = computed(() => {
-  return new helpCalendarClass(
-    fConfigs.value.sundayStart,
-    checkHiddenElement("leftAndRightDays"),
-    fConfigs.value.dateFormat,
-    fConfigs.value.dayNames
-  );
-});
-const singleSelectedDate = computed({
-  get() {
-    let res = "";
-    if (props.displayTimeInput) {
-      const validFormats = [
-        "HH:MM",
-        "HH:mm",
-        "hh:MM",
-        "hh:mm",
-        "MM:HH",
-        "mm:HH",
-        "MM:hh",
-        "mm:hh",
-      ];
-      let format = fConfigs.value.dateFormat;
-      if (this.dateFormat) {
-        format = this.dateFormat;
+    endDMY() {
+      //end only with Day Month and Year
+      if (this.calendar.dateRange.end) {
+        return this.calendar.dateRange.end.split(' ')[0]
       }
-      if (validFormats.indexOf(format.split(" ")[1]) > 3) {
-        res +=
-          " " +
-          [calendar.value.selectedHour, calendar.value.selectedMinute]
-            .reverse()
-            .join(":");
-      } else {
-        res +=
-          " " +
-          [calendar.value.selectedHour, calendar.value.selectedMinute].join(":");
+      return ''
+    },
+    rangeIsSelected() {
+      if (!this.isMultipleDateRange)
+        return !!(this.calendar.dateRange.end && this.calendar.dateRange.start)
+      return this.calendar.multipleDateRange.length > 0
+    },
+    helpCalendar() {
+      return new helpCalendarClass(
+        this.fConfigs.sundayStart,
+        this.checkHiddenElement('leftAndRightDays'),
+        this.fConfigs.dateFormat,
+        this.fConfigs.dayNames
+      )
+    },
+    singleSelectedDate: {
+      get() {
+        let res = ''
+        if (this.displayTimeInput) {
+          const validFormats = [
+            'HH:MM',
+            'HH:mm',
+            'hh:MM',
+            'hh:mm',
+            'MM:HH',
+            'mm:HH',
+            'MM:hh',
+            'mm:hh'
+          ]
+          let format = this.fConfigs.dateFormat
+          if (this.dateFormat) {
+            format = this.dateFormat
+          }
+          if (validFormats.indexOf(format.split(' ')[1]) > 3) {
+            res +=
+              ' ' +
+              [this.calendar.selectedHour, this.calendar.selectedMinute]
+                .reverse()
+                .join(':')
+          } else {
+            res +=
+              ' ' +
+              [this.calendar.selectedHour, this.calendar.selectedMinute].join(
+                ':'
+              )
+          }
+        }
+
+        return this.calendar.selectedDate
+          ? this.calendar.selectedDate + res
+          : ''
+      },
+      set(newValue) {
+        newValue = this.helpCalendar.mask(newValue)
+        if (this.helpCalendar.getDateFromFormat(newValue).getMonth()) {
+          this.calendar.selectedDate = newValue
+        }
+      }
+    }
+  },
+  created() {
+    this.setConfigs()
+    this.initCalendar()
+  },
+  mounted() {
+    //show time placeholder
+    if (this.displayTimeInput) {
+      const timeFormat = this.fConfigs.placeholder.split(' ')[1]
+      if (!timeFormat) {
+        this.fConfigs.placeholder += ' hh:mm'
       }
     }
 
-    return calendar.value.selectedDate ? calendar.value.selectedDate + res : "";
+    this.popoverElement = this.$refs.popoverElement
+    // Event
+    this.popoverElement.addEventListener('focusin', this.onFocusIn)
+    this.popoverElement.addEventListener('focusout', this.onFocusOut)
+    window.addEventListener('click', this.hideMonthYearPicker, {
+      capture: true
+    })
+
+    // Reacts to external selected dates
+    this.$watch(
+      'value',
+      function(value) {
+        if (
+          typeof value === 'object' &&
+          (value.hasOwnProperty('dateRange') ||
+            value.hasOwnProperty('selectedDate'))
+        ) {
+          this.calendar = value
+        } else if (
+          typeof value === 'object' &&
+          value.hasOwnProperty('multipleDateRange')
+        ) {
+          this.calendar.multipleDateRange = value.multipleDateRange
+          const lastElement = this.calendar.multipleDateRange[
+            Math.max(0, this.calendar.multipleDateRange.length - 1)
+          ]
+          if (
+            lastElement &&
+            ((lastElement.start && !lastElement.end) ||
+              (!lastElement.start && lastElement.end))
+          ) {
+            throw new Error('Invalid Data Range')
+          }
+        }
+      },
+      { immediate: true, deep: true }
+    )
+
+    this.$watch(
+      'showCalendar',
+      function(value) {
+        if (value) this.$emit('opened')
+        else this.$emit('closed')
+      },
+      { immediate: true, deep: true }
+    )
   },
-  set(newValue) {
-    newValue = helpCalendar.value.mask(newValue);
-    if (helpCalendar.value.getDateFromFormat(newValue).getMonth()) {
-      calendar.value.selectedDate = newValue;
+  beforeDestroy: function() {
+    window.removeEventListener('focusin', this.onFocusIn)
+    window.removeEventListener('focusout', this.onFocusOut)
+    window.removeEventListener('click', this.hideMonthYearPicker)
+  },
+  watch: {
+    enabledDates: {
+      handler() {
+        this.fConfigs.enabledDates = this.enabledDates;
+      },
+      deep: true
+    },
+    'configs.enabledDates': {
+      handler() {
+        this.fConfigs.enabledDates = this.configs.enabledDates;
+      },
+      deep: true
+    },
+    fConfigs: {
+      handler() {
+        this.markChooseDays()
+      },
+      deep: true,
+      immediate: true
+    },
+    calendar: {
+      handler() {
+        this.markChooseDays()
+      },
+      deep: true,
+      immediate: true
+    },
+    'calendar.currentDate': {
+      handler(value) {
+        this.$emit('input', this.calendar)
+        this.checkLimits(value)
+      }
     }
   },
-});
-
-  const initCalendar = ()=> {
-      setCalendarData()
-      listRendering()
-      markChooseDays()
-      checkLimits(calendar.value.currentDate)
-    }
-
-  const updateCalendar = ()=> {
-      setExistingCalendarData()
-      listRendering()
-      markChooseDays()
-    }
-
-      const  isNotSeparatelyAndFirst =(key) =>{
-      return props.isSeparately || key == 0
-    }
-
-       const setCalendarData=() =>{
-      let date = calendar.value.currentDate
+  methods: {
+    initCalendar() {
+      this.setCalendarData()
+      this.listRendering()
+      this.markChooseDays()
+      this.checkLimits(this.calendar.currentDate)
+    },
+    updateCalendar() {
+      this.setExistingCalendarData()
+      this.listRendering()
+      this.markChooseDays()
+    },
+    isNotSeparatelyAndFirst(key) {
+      return this.isSeparately || key == 0
+    },
+    setCalendarData() {
+      let date = this.calendar.currentDate
       date = new Date(date.getFullYear(), date.getMonth() - 1)
 
-      listCalendars.value = []
+      this.listCalendars = []
 
-      for (let i = 0; i < fConfigs.value.calendarsCount; i++) {
+      for (let i = 0; i < this.fConfigs.calendarsCount; i++) {
         date = new Date(date.getFullYear(), date.getMonth() + 1)
 
-        const calendar = {
+        let calendar = {
           key: i + hUniqueID(),
           date: date,
           dateTop: `${
-            fConfigs.value.monthNames[date.getMonth()]
+            this.fConfigs.monthNames[date.getMonth()]
           } ${date.getFullYear()}`,
-          month: fConfigs.value.monthNames[date.getMonth()],
+          month: this.fConfigs.monthNames[date.getMonth()],
           year: date.getFullYear(),
-          weeks: helpCalendar.value.getFinalizedWeeks(
+          weeks: this.helpCalendar.getFinalizedWeeks(
             date.getMonth(),
             date.getFullYear()
           )
         }
 
-       listCalendars.value.push(calendar)
+        this.listCalendars.push(calendar)
 
-        if (!fConfigs.value.isMultiple) {
+        if (!this.fConfigs.isMultiple) {
           break
         }
       }
-    }
+    },
+    setExistingCalendarData() {
+      for (let i = 0; i < this.listCalendars.length; i++) {
+        let calendar = this.listCalendars[i]
+        let date = calendar.date
 
-  const setExistingCalendarData = ()=> {
-      for (let i = 0; i <listCalendars.value.length; i++) {
-        const calendar =listCalendars.value[i]
-        const date = calendar.date
-
-        listCalendars[i] = {
+        this.listCalendars[i]= {
           key: calendar.key,
           date: date,
           dateTop: `${
-            fConfigs.value.monthNames[date.getMonth()]
+            this.fConfigs.monthNames[date.getMonth()]
           } ${date.getFullYear()}`,
-          month: fConfigs.value.monthNames[date.getMonth()],
+          month: this.fConfigs.monthNames[date.getMonth()],
           year: date.getFullYear(),
-          weeks: helpCalendar.value.getFinalizedWeeks(
+          weeks: this.helpCalendar.getFinalizedWeeks(
             date.getMonth(),
             date.getFullYear()
           )
         }
 
-        if (!fConfigs.value.isMultiple) {
+        if (!this.fConfigs.isMultiple) {
           break
         }
       }
-    }
-
-const setConfigs=()=> {
+    },
+    setConfigs() {
       let globalOptions
       if (typeof this.$getOptions !== 'undefined') {
         // Global Options
         globalOptions = this.$getOptions()
         Object.keys(globalOptions).forEach(objectKey => {
-          if (typeof fConfigs.value[objectKey] !== 'undefined') {
-            console.log(this);
-            this.$set(fConfigs.value, objectKey, globalOptions[objectKey])
+          if (typeof this.fConfigs[objectKey] !== 'undefined') {
+            this.fConfigs[objectKey] = globalOptions[objectKey]
           }
         })
       }
 
       if (typeof this.configs !== 'undefined') {
-        Object.keys(fConfigs.value).forEach(objectKey => {
+        Object.keys(this.fConfigs).forEach(objectKey => {
           if (typeof this.configs[objectKey] !== 'undefined') {
             // Get From Configs
-            console.log(this);
-            this.$set(fConfigs.value, objectKey, this.configs[objectKey])
+            this.fConfigs[objectKey] = this.configs[objectKey]
           }
         })
       } else {
         Object.keys(this.$props).forEach(objectKey => {
           if (
-            typeof fConfigs.value[objectKey] !== 'undefined' &&
+            typeof this.fConfigs[objectKey] !== 'undefined' &&
             typeof this.$props[objectKey] !== 'undefined'
           ) {
-            console.log(this);
-            this.$set(fConfigs.value, objectKey, this.$props[objectKey])
+            this.fConfigs[objectKey]= this.$props[objectKey]
           }
         })
       }
 
       // Is Modal
-      if (fConfigs.value.isModal) showCalendar.value = false
+      if (this.fConfigs.isModal) this.showCalendar = false
 
       // Placeholder
-      if (!fConfigs.value.placeholder)
-        fConfigs.value.placeholder = fConfigs.value.dateFormat
+      if (!this.fConfigs.placeholder)
+        this.fConfigs.placeholder = this.fConfigs.dateFormat
 
       if (typeof this.newCurrentDate !== 'undefined') {
-        calendar.value.currentDate = this.newCurrentDate
+        this.calendar.currentDate = this.newCurrentDate
       }
 
       // Sunday Start
-      if (fConfigs.value.sundayStart) {
-        const dayNames = [...fConfigs.value.dayNames]
-        const sundayName = dayNames[dayNames.length - 1]
+      if (this.fConfigs.sundayStart) {
+        let dayNames = [...this.fConfigs.dayNames]
+        let sundayName = dayNames[dayNames.length - 1]
         dayNames.splice(dayNames.length - 1, 1)
         dayNames.unshift(sundayName)
-        fConfigs.value.dayNames = dayNames
+        this.fConfigs.dayNames = dayNames
       }
-}
-
-const listRendering = () => {
+    },
+    listRendering() {
       // Each Calendars
-     listCalendars.value.forEach(calendar => {
+      this.listCalendars.forEach(calendar => {
         // Set Calendar Weeks
         calendar.weeks.forEach(week => {
-          const finalizedDays = []
+          let finalizedDays = []
 
           week.days.forEach(day => {
-            const date = new Date(day.year, day.month, day.day)
-            const now = new Date()
+            let date = new Date(day.year, day.month, day.day)
+            let now = new Date()
 
             let isToday = false
 
@@ -736,18 +555,18 @@ const listRendering = () => {
 
             let checkMarked
             // With Custom Classes
-            if (typeof fConfigs.value.markedDates[0] === 'object') {
-              checkMarked = fConfigs.value.markedDates.find(markDate => {
-                return markDate.date === helpCalendar.value.formatDate(date)
+            if (typeof this.fConfigs.markedDates[0] === 'object') {
+              checkMarked = this.fConfigs.markedDates.find(markDate => {
+                return markDate.date === this.helpCalendar.formatDate(date)
               })
             } else {
               // Without Classes
-              checkMarked = fConfigs.value.markedDates.find(markDate => {
-                return markDate === helpCalendar.value.formatDate(date)
+              checkMarked = this.fConfigs.markedDates.find(markDate => {
+                return markDate === this.helpCalendar.formatDate(date)
               })
             }
 
-            if (this.startDMY === helpCalendar.value.formatDate(date)) {
+            if (this.startDMY === this.helpCalendar.formatDate(date)) {
               checkMarked = true
             }
 
@@ -758,16 +577,16 @@ const listRendering = () => {
 
             finalizedDays.push({
               day: day.day,
-              date: helpCalendar.value.formatDate(date),
+              date: this.helpCalendar.formatDate(date),
               hide: day.hide,
               isMouseToLeft: false,
               isMouseToRight: false,
               isHovered: false,
               isDateRangeStart: this.checkDateRangeStart(
-                helpCalendar.value.formatDate(date)
+                this.helpCalendar.formatDate(date)
               ),
               isDateRangeEnd: this.checkDateRangeEnd(
-                helpCalendar.value.formatDate(date)
+                this.helpCalendar.formatDate(date)
               ),
               hideLeftAndRightDays: day.hideLeftAndRightDays,
               isToday,
@@ -778,18 +597,17 @@ const listRendering = () => {
           week.days = finalizedDays
         })
       })
-}
-
-const clickDay = (item, isDisabledDate)=> {
-      if (fConfigs.value.withTimePicker && fConfigs.value.isDateRange) {
+    },
+    clickDay(item, isDisabledDate) {
+      if (this.fConfigs.withTimePicker && this.fConfigs.isDateRange) {
         item.date = item.date + ' 00:00'
       }
-      emit('dayClicked', item)
+      this.$emit('dayClicked', item)
 
       if (
-        !fConfigs.value.isDateRange &&
-        !fConfigs.value.isDatePicker &&
-        !fConfigs.value.isMultipleDatePicker
+        !this.fConfigs.isDateRange &&
+        !this.fConfigs.isDatePicker &&
+        !this.fConfigs.isMultipleDatePicker
       ) {
         return false
       }
@@ -797,14 +615,14 @@ const clickDay = (item, isDisabledDate)=> {
       //Disabled Dates - Start
 
       // Disable days of week if set in configuration
-      let dateDay = helpCalendar.value.getDateFromFormat(item.date).getDay() - 1
+      let dateDay = this.helpCalendar.getDateFromFormat(item.date).getDay() - 1
       if (dateDay === -1) {
         dateDay = 6
       }
 
-      const dayOfWeekString = fConfigs.value.dayNames[dateDay]
+      let dayOfWeekString = this.fConfigs.dayNames[dateDay]
       if (
-        fConfigs.value.disabledDayNames.includes(dayOfWeekString) ||
+        this.fConfigs.disabledDayNames.includes(dayOfWeekString) ||
         isDisabledDate(item.date)
       ) {
         return false
@@ -813,14 +631,14 @@ const clickDay = (item, isDisabledDate)=> {
       //Disabled Dates - End
 
       // Limits
-      if (fConfigs.value.limits) {
-        const min = helpCalendar.value
-          .getDateFromFormat(fConfigs.value.limits.min)
+      if (this.fConfigs.limits) {
+        let min = this.helpCalendar
+          .getDateFromFormat(this.fConfigs.limits.min)
           .getTime()
-        const max = helpCalendar.value
-          .getDateFromFormat(fConfigs.value.limits.max)
+        let max = this.helpCalendar
+          .getDateFromFormat(this.fConfigs.limits.max)
           .getTime()
-        const date = helpCalendar.value.getDateFromFormat(item.date).getTime()
+        let date = this.helpCalendar.getDateFromFormat(item.date).getTime()
 
         if (date < min || date > max) {
           return false
@@ -828,30 +646,30 @@ const clickDay = (item, isDisabledDate)=> {
       }
 
       // Date Multiple Range
-      if (fConfigs.value.isMultipleDateRange) {
-        const clickDate = helpCalendar.value
+      if (this.fConfigs.isMultipleDateRange) {
+        let clickDate = this.helpCalendar
           .getDateFromFormat(item.date.split(' ')[0])
           .getTime()
-        let rangesLength = calendar.value.multipleDateRange.length
-        let lastRange = calendar.value.multipleDateRange[rangesLength - 1]
+        let rangesLength = this.calendar.multipleDateRange.length
+        let lastRange = this.calendar.multipleDateRange[rangesLength - 1]
         let startDate = ''
         // if (lastRange) {
         //   // if (lastRange.start && lastRange.end)
         // } else
 
         if (!lastRange) {
-          calendar.value.multipleDateRange.push({ end: '', start: '' })
-          rangesLength = calendar.value.multipleDateRange.length
-          lastRange = calendar.value.multipleDateRange[rangesLength - 1]
+          this.calendar.multipleDateRange.push({ end: '', start: '' })
+          rangesLength = this.calendar.multipleDateRange.length
+          lastRange = this.calendar.multipleDateRange[rangesLength - 1]
         }
 
         if (lastRange.start) {
-          startDate = helpCalendar.value.getDateFromFormat(lastRange.start)
+          startDate = this.helpCalendar.getDateFromFormat(lastRange.start)
         }
 
         // Two dates is not empty
         if (lastRange.start !== '' && lastRange.end !== '') {
-          calendar.value.multipleDateRange.push({ end: '', start: item.date })
+          this.calendar.multipleDateRange.push({ end: '', start: item.date })
           // lastRange.start = item.date
           // lastRange.end = ''
           // Not date selected
@@ -863,7 +681,7 @@ const clickDay = (item, isDisabledDate)=> {
           // Start date not empty, chose date <= start date (also same date range select)
         } else if (lastRange.start !== '' && clickDate <= startDate.getTime()) {
           this.$nextTick(() => {
-            if (calendar.value.withTimePicker) {
+            if (this.calendar.withTimePicker) {
               this.$refs['timePicker'].startDateActive = true
             }
           })
@@ -873,25 +691,25 @@ const clickDay = (item, isDisabledDate)=> {
 
         //Get number of days between date range dates
         if (lastRange.start !== '' && lastRange.end !== '') {
-          const oneDay = 24 * 60 * 60 * 1000
-          const firstDate = helpCalendar.value.getDateFromFormat(lastRange.start)
-          const secondDate = helpCalendar.value.getDateFromFormat(lastRange.end)
-          const diffDays = Math.round(
+          let oneDay = 24 * 60 * 60 * 1000
+          let firstDate = this.helpCalendar.getDateFromFormat(lastRange.start)
+          let secondDate = this.helpCalendar.getDateFromFormat(lastRange.end)
+          let diffDays = Math.round(
             Math.abs((firstDate.getTime() - secondDate.getTime()) / oneDay)
           )
-          const itemTime = helpCalendar.value
+          let itemTime = this.helpCalendar
             .getDateFromFormat(item.date)
             .getTime()
 
-          emit('selectedDaysCount', diffDays)
+          this.$emit('selectedDaysCount', diffDays)
 
           // Is Auto Closeable
-          if (fConfigs.value.isModal && fConfigs.value.isAutoCloseable) {
-            showCalendar.value = false
+          if (this.fConfigs.isModal && this.fConfigs.isAutoCloseable) {
+            this.showCalendar = false
           }
 
           // Minimum Selected Days
-          const minSelDays = fConfigs.value.minSelDays
+          let minSelDays = this.fConfigs.minSelDays
 
           if (
             minSelDays &&
@@ -899,7 +717,7 @@ const clickDay = (item, isDisabledDate)=> {
             diffDays < minSelDays
           ) {
             startDate.setDate(startDate.getDate() + (minSelDays - 1))
-            lastRange.end = helpCalendar.value.formatDate(startDate)
+            lastRange.end = this.helpCalendar.formatDate(startDate)
           }
 
           if (
@@ -908,11 +726,11 @@ const clickDay = (item, isDisabledDate)=> {
             diffDays < minSelDays
           ) {
             startDate.setDate(startDate.getDate() - (minSelDays - 1))
-            lastRange.start = helpCalendar.value.formatDate(startDate)
+            lastRange.start = this.helpCalendar.formatDate(startDate)
           }
 
           // Maximum Selected Days
-          const maxSelDays = fConfigs.value.maxSelDays
+          let maxSelDays = this.fConfigs.maxSelDays
 
           if (
             maxSelDays &&
@@ -920,7 +738,7 @@ const clickDay = (item, isDisabledDate)=> {
             diffDays >= maxSelDays
           ) {
             startDate.setDate(startDate.getDate() + (maxSelDays - 1))
-            lastRange.end = helpCalendar.value.formatDate(startDate)
+            lastRange.end = this.helpCalendar.formatDate(startDate)
           }
 
           if (
@@ -929,85 +747,85 @@ const clickDay = (item, isDisabledDate)=> {
             diffDays >= maxSelDays
           ) {
             startDate.setDate(startDate.getDate() - (maxSelDays - 1))
-            lastRange.start = helpCalendar.value.formatDate(startDate)
+            lastRange.start = this.helpCalendar.formatDate(startDate)
           }
         }
 
-        emit('input', calendar.value)
+        this.$emit('input', this.calendar)
       } // Date Range
-      else if (fConfigs.value.isDateRange) {
-        const clickDate = helpCalendar.value
+      else if (this.fConfigs.isDateRange) {
+        let clickDate = this.helpCalendar
           .getDateFromFormat(item.date.split(' ')[0])
           .getTime()
 
         let startDate = ''
-        if (calendar.value.dateRange.start) {
-          startDate = helpCalendar.value.getDateFromFormat(
-            calendar.value.dateRange.start
+        if (this.calendar.dateRange.start) {
+          startDate = this.helpCalendar.getDateFromFormat(
+            this.calendar.dateRange.start
           )
         }
 
         // Two dates is not empty
         if (
-          calendar.value.dateRange.start !== '' &&
-          calendar.value.dateRange.end !== ''
+          this.calendar.dateRange.start !== '' &&
+          this.calendar.dateRange.end !== ''
         ) {
-          calendar.value.dateRange.start = item.date
-          calendar.value.dateRange.end = ''
+          this.calendar.dateRange.start = item.date
+          this.calendar.dateRange.end = ''
           // Not date selected
         } else if (
-          calendar.value.dateRange.start === '' &&
-          calendar.value.dateRange.end === ''
+          this.calendar.dateRange.start === '' &&
+          this.calendar.dateRange.end === ''
         ) {
-          calendar.value.dateRange.start = item.date
+          this.calendar.dateRange.start = item.date
           // Start Date not empty, chose date > start date
         } else if (
-          calendar.value.dateRange.end === '' &&
+          this.calendar.dateRange.end === '' &&
           clickDate > startDate.getTime()
         ) {
-          calendar.value.dateRange.end = item.date
+          this.calendar.dateRange.end = item.date
           // Start date not empty, chose date <= start date (also same date range select)
         } else if (
-          calendar.value.dateRange.start !== '' &&
+          this.calendar.dateRange.start !== '' &&
           clickDate <= startDate.getTime()
         ) {
           this.$nextTick(() => {
-            if (calendar.value.dateRange && calendar.value.withTimePicker) {
+            if (this.calendar.dateRange && this.calendar.withTimePicker) {
               this.$refs['timePicker'].startDateActive = true
             }
           })
-          calendar.value.dateRange.end = calendar.value.dateRange.start
-          calendar.value.dateRange.start = item.date
+          this.calendar.dateRange.end = this.calendar.dateRange.start
+          this.calendar.dateRange.start = item.date
         }
 
         //Get number of days between date range dates
         if (
-          calendar.value.dateRange.start !== '' &&
-          calendar.value.dateRange.end !== ''
+          this.calendar.dateRange.start !== '' &&
+          this.calendar.dateRange.end !== ''
         ) {
-          const oneDay = 24 * 60 * 60 * 1000
-          const firstDate = helpCalendar.value.getDateFromFormat(
-            calendar.value.dateRange.start
+          let oneDay = 24 * 60 * 60 * 1000
+          let firstDate = this.helpCalendar.getDateFromFormat(
+            this.calendar.dateRange.start
           )
-          const secondDate = helpCalendar.value.getDateFromFormat(
-            calendar.value.dateRange.end
+          let secondDate = this.helpCalendar.getDateFromFormat(
+            this.calendar.dateRange.end
           )
-          const diffDays = Math.round(
+          let diffDays = Math.round(
             Math.abs((firstDate.getTime() - secondDate.getTime()) / oneDay)
           )
-          const itemTime = helpCalendar.value
+          let itemTime = this.helpCalendar
             .getDateFromFormat(item.date)
             .getTime()
 
-          emit('selectedDaysCount', diffDays)
+          this.$emit('selectedDaysCount', diffDays)
 
           // Is Auto Closeable
-          if (fConfigs.value.isModal && fConfigs.value.isAutoCloseable) {
-            showCalendar.value = false
+          if (this.fConfigs.isModal && this.fConfigs.isAutoCloseable) {
+            this.showCalendar = false
           }
 
           // Minimum Selected Days
-          const minSelDays = fConfigs.value.minSelDays
+          let minSelDays = this.fConfigs.minSelDays
 
           if (
             minSelDays &&
@@ -1015,7 +833,7 @@ const clickDay = (item, isDisabledDate)=> {
             diffDays < minSelDays
           ) {
             startDate.setDate(startDate.getDate() + (minSelDays - 1))
-            calendar.value.dateRange.end = helpCalendar.value.formatDate(
+            this.calendar.dateRange.end = this.helpCalendar.formatDate(
               startDate
             )
           }
@@ -1026,13 +844,13 @@ const clickDay = (item, isDisabledDate)=> {
             diffDays < minSelDays
           ) {
             startDate.setDate(startDate.getDate() - (minSelDays - 1))
-            calendar.value.dateRange.start = helpCalendar.value.formatDate(
+            this.calendar.dateRange.start = this.helpCalendar.formatDate(
               startDate
             )
           }
 
           // Maximum Selected Days
-          const maxSelDays = fConfigs.value.maxSelDays
+          let maxSelDays = this.fConfigs.maxSelDays
 
           if (
             maxSelDays &&
@@ -1040,7 +858,7 @@ const clickDay = (item, isDisabledDate)=> {
             diffDays >= maxSelDays
           ) {
             startDate.setDate(startDate.getDate() + (maxSelDays - 1))
-            calendar.value.dateRange.end = helpCalendar.value.formatDate(
+            this.calendar.dateRange.end = this.helpCalendar.formatDate(
               startDate
             )
           }
@@ -1051,78 +869,77 @@ const clickDay = (item, isDisabledDate)=> {
             diffDays >= maxSelDays
           ) {
             startDate.setDate(startDate.getDate() - (maxSelDays - 1))
-            calendar.value.dateRange.start = helpCalendar.value.formatDate(
+            this.calendar.dateRange.start = this.helpCalendar.formatDate(
               startDate
             )
           }
         }
 
-        emit('input', calendar.value)
-      } else if (fConfigs.value.isDatePicker) {
-        calendar.value.selectedDate = item.date
-        emit('input', calendar.value)
+        this.$emit('input', this.calendar)
+      } else if (this.fConfigs.isDatePicker) {
+        this.calendar.selectedDate = item.date
+        this.$emit('input', this.calendar)
 
         // Is Auto Closeable
-        if (fConfigs.value.isModal && fConfigs.value.isAutoCloseable) {
-          showCalendar.value = false
+        if (this.fConfigs.isModal && this.fConfigs.isAutoCloseable) {
+          this.showCalendar = false
         }
-      } else if (fConfigs.value.isMultipleDatePicker) {
+      } else if (this.fConfigs.isMultipleDatePicker) {
         if (
-          calendar.value.hasOwnProperty('selectedDates') &&
-          calendar.value.selectedDates.find(date => date.date === item.date)
+          this.calendar.hasOwnProperty('selectedDates') &&
+          this.calendar.selectedDates.find(date => date.date === item.date)
         ) {
-          const dateIndex = calendar.value.selectedDates.findIndex(
+          let dateIndex = this.calendar.selectedDates.findIndex(
             date => date.date === item.date
           )
-          calendar.value.selectedDates.splice(dateIndex, 1)
+          this.calendar.selectedDates.splice(dateIndex, 1)
         } else {
-          const date = Object.assign({}, this.defaultDateFormat)
+          let date = Object.assign({}, this.defaultDateFormat)
           date.date = item.date
 
-          if (!calendar.value.hasOwnProperty('selectedDates')) {
-            calendar.value.selectedDates = []
+          if (!this.calendar.hasOwnProperty('selectedDates')) {
+            this.calendar.selectedDates = []
           }
 
-          calendar.value.selectedDates.push(date)
+          this.calendar.selectedDates.push(date)
         }
 
-        emit('input', calendar.value)
+        this.$emit('input', this.calendar)
       }
 
-      markChooseDays()
+      this.markChooseDays()
 
       // Time Picker
-      if (fConfigs.value.withTimePicker) {
-        if (fConfigs.value.isDateRange || fConfigs.value.isDatePicker) {
-          openTimePicker()
+      if (this.fConfigs.withTimePicker) {
+        if (this.fConfigs.isDateRange || this.fConfigs.isDatePicker) {
+          this.openTimePicker()
         }
 
         if (
-          calendar.value.selectedDates.find(date => date.date === item.date) &&
-          fConfigs.value.isMultipleDatePicker
+          this.calendar.selectedDates.find(date => date.date === item.date) &&
+          this.fConfigs.isMultipleDatePicker
         ) {
           this.openTimePicker()
         }
       }
 
-      emit('choseDay', item)
-}
-
-const markChooseDays=()=> {
-      const startDate = this.startDMY
-      const endDate = this.endDMY
-     listCalendars.value.forEach(calendar => {
+      this.$emit('choseDay', item)
+    },
+    markChooseDays() {
+      let startDate = this.startDMY
+      let endDate = this.endDMY
+      this.listCalendars.forEach(calendar => {
         calendar.weeks.forEach(week => {
           week.days.forEach(day => {
             day.isMarked = false
             day.date = day.date.split(' ')[0]
             // Date Picker
-            if (fConfigs.value.isDatePicker) {
-              if (calendar.value.selectedDate === day.date) day.isMarked = true
-            } else if (fConfigs.value.isMultipleDatePicker) {
+            if (this.fConfigs.isDatePicker) {
+              if (this.calendar.selectedDate === day.date) day.isMarked = true
+            } else if (this.fConfigs.isMultipleDatePicker) {
               if (
-                calendar.value.hasOwnProperty('selectedDates') &&
-                calendar.value.selectedDates.find(date => date.date === day.date)
+                this.calendar.hasOwnProperty('selectedDates') &&
+                this.calendar.selectedDates.find(date => date.date === day.date)
               )
                 day.isMarked = true
             } else {
@@ -1139,9 +956,9 @@ const markChooseDays=()=> {
                 day.isMarked = true
               }
               //Multiple Range
-              if (calendar.value.multipleDateRange) {
+              if (this.calendar.multipleDateRange) {
                 if (
-                  ~calendar.value.multipleDateRange
+                  ~this.calendar.multipleDateRange
                     .map(range => range.start.split(' ')[0])
                     .indexOf(day.date)
                 ) {
@@ -1149,24 +966,24 @@ const markChooseDays=()=> {
                   day.isMarked = true
                 }
                 if (
-                  ~calendar.value.multipleDateRange
+                  ~this.calendar.multipleDateRange
                     .map(range => range.end.split(' ')[0])
                     .indexOf(day.date)
                 ) {
                   day.isMouseToRight = !!endDate
                   day.isMarked = true
                 }
-                calendar.value.multipleDateRange.forEach(range => {
+                this.calendar.multipleDateRange.forEach(range => {
                   if (range.start && range.start === range.end) {
                     day.isMouseToLeft = false
                     day.isMouseToRight = false
                   }
                   if (range.start && range.end) {
                     if (
-                      helpCalendar.value.getDateFromFormat(day.date).getTime() >
-                        helpCalendar.value.getDateFromFormat(range.start) &&
-                      helpCalendar.value.getDateFromFormat(day.date) <
-                        helpCalendar.value.getDateFromFormat(range.end)
+                      this.helpCalendar.getDateFromFormat(day.date).getTime() >
+                        this.helpCalendar.getDateFromFormat(range.start) &&
+                      this.helpCalendar.getDateFromFormat(day.date) <
+                        this.helpCalendar.getDateFromFormat(range.end)
                     ) {
                       day.isMarked = true
                     }
@@ -1180,38 +997,37 @@ const markChooseDays=()=> {
               }
               if (startDate && endDate) {
                 if (
-                  helpCalendar.value.getDateFromFormat(day.date).getTime() >
-                    helpCalendar.value.getDateFromFormat(startDate) &&
-                  helpCalendar.value.getDateFromFormat(day.date) <
-                    helpCalendar.value.getDateFromFormat(endDate)
+                  this.helpCalendar.getDateFromFormat(day.date).getTime() >
+                    this.helpCalendar.getDateFromFormat(startDate) &&
+                  this.helpCalendar.getDateFromFormat(day.date) <
+                    this.helpCalendar.getDateFromFormat(endDate)
                 ) {
                   day.isMarked = true
                 }
               }
             }
-            if (fConfigs.value.markedDates.includes(day.date))
+            if (this.fConfigs.markedDates.includes(day.date))
               day.isMarked = true
           })
         })
       })
-}
+    },
+    dayMouseOver(date) {
+      this.$emit('dayMouseOver', date)
 
-const dayMouseOver = (date) => {
-      emit('dayMouseOver', date)
-
-      if (!fConfigs.value.isDateRange) {
+      if (!this.fConfigs.isDateRange) {
         return false
       }
 
       // Limits
-      if (fConfigs.value.limits) {
-        const limitMin = helpCalendar.value
-          .getDateFromFormat(fConfigs.value.limits.min)
+      if (this.fConfigs.limits) {
+        let limitMin = this.helpCalendar
+          .getDateFromFormat(this.fConfigs.limits.min)
           .getTime()
-        const limitMax = helpCalendar.value
-          .getDateFromFormat(fConfigs.value.limits.max)
+        let limitMax = this.helpCalendar
+          .getDateFromFormat(this.fConfigs.limits.max)
           .getTime()
-        const limitDate = helpCalendar.value.getDateFromFormat(date).getTime()
+        let limitDate = this.helpCalendar.getDateFromFormat(date).getTime()
 
         if (limitDate < limitMin || limitDate > limitMax) {
           return false
@@ -1221,134 +1037,134 @@ const dayMouseOver = (date) => {
       //Multiple Range
 
       if (
-        (calendar.value.dateRange.start === '' ||
-          calendar.value.dateRange.end === '') &&
-        (calendar.value.dateRange.start !== '' ||
-          calendar.value.dateRange.end !== '')
+        (this.calendar.dateRange.start === '' ||
+          this.calendar.dateRange.end === '') &&
+        (this.calendar.dateRange.start !== '' ||
+          this.calendar.dateRange.end !== '')
       ) {
-        for (let e = 0; e <listCalendars.value.length; e++) {
-          const calendar =listCalendars.value[e]
+        for (let e = 0; e < this.listCalendars.length; e++) {
+          let calendar = this.listCalendars[e]
 
           for (let f = 0; f < calendar.weeks.length; f++) {
-            const week = calendar.weeks[f]
+            let week = calendar.weeks[f]
 
             for (let i = 0; i < week.days.length; i++) {
-              const item = week.days[i]
+              let item = week.days[i]
 
-             listCalendars.value[e].weeks[f].days[i].isHovered = false
+              this.listCalendars[e].weeks[f].days[i].isHovered = false
               if (
                 item.date !== this.startDMY &&
-                !fConfigs.value.markedDates.includes(item.date)
+                !this.fConfigs.markedDates.includes(item.date)
               ) {
-               listCalendars.value[e].weeks[f].days[i].isMarked = false
+                this.listCalendars[e].weeks[f].days[i].isMarked = false
               }
 
-              if (calendar.value.dateRange.start) {
-                const itemDate = helpCalendar.value
+              if (this.calendar.dateRange.start) {
+                let itemDate = this.helpCalendar
                   .getDateFromFormat(item.date)
                   .getTime()
 
-                const thisDate = helpCalendar.value
+                let thisDate = this.helpCalendar
                   .getDateFromFormat(date)
                   .getTime()
-                const startDate = helpCalendar.value.getDateFromFormat(
-                  calendar.value.dateRange.start
+                let startDate = this.helpCalendar.getDateFromFormat(
+                  this.calendar.dateRange.start
                 )
 
-               listCalendars.value[e].weeks[f].days[i].isMouseToLeft =
+                this.listCalendars[e].weeks[f].days[i].isMouseToLeft =
                   (itemDate === startDate.getTime() &&
                     thisDate > startDate.getTime()) ||
                   (itemDate === thisDate && thisDate < startDate.getTime())
-               listCalendars.value[e].weeks[f].days[i].isMouseToRight =
+                this.listCalendars[e].weeks[f].days[i].isMouseToRight =
                   (itemDate === startDate.getTime() &&
                     thisDate < startDate.getTime()) ||
                   (itemDate === thisDate && thisDate > startDate.getTime())
 
                 let dateDay =
-                  helpCalendar.value.getDateFromFormat(item.date).getDay() - 1
+                  this.helpCalendar.getDateFromFormat(item.date).getDay() - 1
                 if (dateDay === -1) {
                   dateDay = 6
                 }
 
-                const dayOfWeekString = fConfigs.value.dayNames[dateDay]
+                let dayOfWeekString = this.fConfigs.dayNames[dateDay]
                 if (
-                  !fConfigs.value.disabledDayNames.includes(dayOfWeekString) &&
+                  !this.fConfigs.disabledDayNames.includes(dayOfWeekString) &&
                   ((itemDate > startDate.getTime() && itemDate < thisDate) ||
                     (itemDate < startDate.getTime() && itemDate > thisDate))
                 ) {
-                 listCalendars.value[e].weeks[f].days[i].isMarked = true
+                  this.listCalendars[e].weeks[f].days[i].isMarked = true
                 }
 
-                if (!calendar.value.dateRange.end && itemDate === thisDate) {
-                 listCalendars.value[e].weeks[f].days[i].isHovered = false
+                if (!this.calendar.dateRange.end && itemDate === thisDate) {
+                  this.listCalendars[e].weeks[f].days[i].isHovered = false
                 }
 
                 if (
                   this.checkSelDates(
                     'min',
-                    calendar.value.dateRange.start,
+                    this.calendar.dateRange.start,
                     item.date,
                     date
                   )
                 ) {
-                 listCalendars.value[e].weeks[f].days[i].isMarked = true
+                  this.listCalendars[e].weeks[f].days[i].isMarked = true
 
                   let minDateToRight, minDateToLeft
                   minDateToLeft = new Date(startDate.getTime())
                   minDateToRight = new Date(startDate.getTime())
                   minDateToLeft.setDate(
-                    minDateToLeft.getDate() - fConfigs.value.minSelDays + 1
+                    minDateToLeft.getDate() - this.fConfigs.minSelDays + 1
                   )
                   minDateToRight.setDate(
-                    minDateToRight.getDate() + fConfigs.value.minSelDays - 1
+                    minDateToRight.getDate() + this.fConfigs.minSelDays - 1
                   )
 
                   if (
                     thisDate >= minDateToLeft.getTime() &&
-                    helpCalendar.value.formatDate(minDateToLeft) === item.date
+                    this.helpCalendar.formatDate(minDateToLeft) === item.date
                   ) {
-                   listCalendars.value[e].weeks[f].days[i].isMarked = false
-                   listCalendars.value[e].weeks[f].days[i].isMouseToLeft = true
-                   listCalendars.value[e].weeks[f].days[i].isHovered = true
+                    this.listCalendars[e].weeks[f].days[i].isMarked = false
+                    this.listCalendars[e].weeks[f].days[i].isMouseToLeft = true
+                    this.listCalendars[e].weeks[f].days[i].isHovered = true
                   } else if (
                     thisDate <= minDateToRight.getTime() &&
-                    helpCalendar.value.formatDate(minDateToRight) === item.date
+                    this.helpCalendar.formatDate(minDateToRight) === item.date
                   ) {
-                   listCalendars.value[e].weeks[f].days[i].isMarked = false
-                   listCalendars.value[e].weeks[f].days[i].isMouseToRight = true
-                   listCalendars.value[e].weeks[f].days[i].isHovered = true
+                    this.listCalendars[e].weeks[f].days[i].isMarked = false
+                    this.listCalendars[e].weeks[f].days[i].isMouseToRight = true
+                    this.listCalendars[e].weeks[f].days[i].isHovered = true
                   }
                 }
 
                 if (
                   this.checkSelDates(
                     'max',
-                    calendar.value.dateRange.start,
+                    this.calendar.dateRange.start,
                     item.date,
                     date
                   )
                 ) {
-                 listCalendars.value[e].weeks[f].days[i].isMarked = false
-                 listCalendars.value[e].weeks[f].days[i].isHovered = false
-                 listCalendars.value[e].weeks[f].days[i].isMouseToLeft = false
-                 listCalendars.value[e].weeks[f].days[i].isMouseToRight = false
+                  this.listCalendars[e].weeks[f].days[i].isMarked = false
+                  this.listCalendars[e].weeks[f].days[i].isHovered = false
+                  this.listCalendars[e].weeks[f].days[i].isMouseToLeft = false
+                  this.listCalendars[e].weeks[f].days[i].isMouseToRight = false
 
                   let maxDateToLeft, maxDateToRight
                   maxDateToLeft = new Date(startDate.getTime())
                   maxDateToRight = new Date(startDate.getTime())
                   maxDateToLeft.setDate(
-                    maxDateToLeft.getDate() - fConfigs.value.maxSelDays + 1
+                    maxDateToLeft.getDate() - this.fConfigs.maxSelDays + 1
                   )
                   maxDateToRight.setDate(
-                    maxDateToRight.getDate() + fConfigs.value.maxSelDays - 1
+                    maxDateToRight.getDate() + this.fConfigs.maxSelDays - 1
                   )
 
                   if (thisDate <= maxDateToLeft.getTime()) {
                     if (
-                      helpCalendar.value.formatDate(maxDateToLeft) === item.date
+                      this.helpCalendar.formatDate(maxDateToLeft) === item.date
                     ) {
-                     listCalendars.value[e].weeks[f].days[i].isHovered = true
-                     listCalendars.value[e].weeks[f].days[
+                      this.listCalendars[e].weeks[f].days[i].isHovered = true
+                      this.listCalendars[e].weeks[f].days[
                         i
                       ].isMouseToLeft = true
                     }
@@ -1356,10 +1172,10 @@ const dayMouseOver = (date) => {
 
                   if (thisDate >= maxDateToRight.getTime()) {
                     if (
-                      helpCalendar.value.formatDate(maxDateToRight) === item.date
+                      this.helpCalendar.formatDate(maxDateToRight) === item.date
                     ) {
-                     listCalendars.value[e].weeks[f].days[i].isHovered = true
-                     listCalendars.value[e].weeks[f].days[
+                      this.listCalendars[e].weeks[f].days[i].isHovered = true
+                      this.listCalendars[e].weeks[f].days[
                         i
                       ].isMouseToRight = true
                     }
@@ -1370,112 +1186,112 @@ const dayMouseOver = (date) => {
           }
         }
       }
-      if (calendar.value.multipleDateRange) {
-        const range = calendar.value.multipleDateRange[
-          calendar.value.multipleDateRange.length - 1
+      if (this.calendar.multipleDateRange) {
+        let range = this.calendar.multipleDateRange[
+          this.calendar.multipleDateRange.length - 1
         ]
         if (!range) return
-        // calendar.value.multipleDateRange.forEach((range, index) => {
+        // this.calendar.multipleDateRange.forEach((range, index) => {
         if (
           (range.start === '' || range.end === '') &&
           (range.start !== '' || range.end !== '')
         ) {
-          for (let e = 0; e <listCalendars.value.length; e++) {
-            const calendar =listCalendars.value[e]
+          for (let e = 0; e < this.listCalendars.length; e++) {
+            let calendar = this.listCalendars[e]
 
             for (let f = 0; f < calendar.weeks.length; f++) {
-              const week = calendar.weeks[f]
+              let week = calendar.weeks[f]
 
               for (let i = 0; i < week.days.length; i++) {
-                const item = week.days[i]
+                let item = week.days[i]
 
-               listCalendars.value[e].weeks[f].days[i].isHovered = false
+                this.listCalendars[e].weeks[f].days[i].isHovered = false
                 if (
                   item.date !== this.startDMY &&
-                  !fConfigs.value.markedDates.includes(item.date)
+                  !this.fConfigs.markedDates.includes(item.date)
                 ) {
-                 listCalendars.value[e].weeks[f].days[i].isMarked = false
+                  this.listCalendars[e].weeks[f].days[i].isMarked = false
                 }
 
                 if (range.start) {
-                  const itemDate = helpCalendar.value
+                  let itemDate = this.helpCalendar
                     .getDateFromFormat(item.date)
                     .getTime()
 
-                  const thisDate = helpCalendar.value
+                  let thisDate = this.helpCalendar
                     .getDateFromFormat(date)
                     .getTime()
-                  const startDate = helpCalendar.value.getDateFromFormat(
+                  let startDate = this.helpCalendar.getDateFromFormat(
                     range.start
                   )
 
-                 listCalendars.value[e].weeks[f].days[i].isMouseToLeft =
+                  this.listCalendars[e].weeks[f].days[i].isMouseToLeft =
                     (itemDate === startDate.getTime() &&
                       thisDate > startDate.getTime()) ||
                     (itemDate === thisDate && thisDate < startDate.getTime())
-                 listCalendars.value[e].weeks[f].days[i].isMouseToRight =
+                  this.listCalendars[e].weeks[f].days[i].isMouseToRight =
                     (itemDate === startDate.getTime() &&
                       thisDate < startDate.getTime()) ||
                     (itemDate === thisDate && thisDate > startDate.getTime())
 
                   let dateDay =
-                    helpCalendar.value.getDateFromFormat(item.date).getDay() - 1
+                    this.helpCalendar.getDateFromFormat(item.date).getDay() - 1
                   if (dateDay === -1) {
                     dateDay = 6
                   }
 
-                  const dayOfWeekString = fConfigs.value.dayNames[dateDay]
+                  let dayOfWeekString = this.fConfigs.dayNames[dateDay]
                   if (
-                    !fConfigs.value.disabledDayNames.includes(dayOfWeekString) &&
+                    !this.fConfigs.disabledDayNames.includes(dayOfWeekString) &&
                     ((itemDate > startDate.getTime() && itemDate < thisDate) ||
                       (itemDate < startDate.getTime() && itemDate > thisDate))
                   ) {
-                   listCalendars.value[e].weeks[f].days[i].isMarked = true
+                    this.listCalendars[e].weeks[f].days[i].isMarked = true
                   }
 
                   if (!range.end && itemDate === thisDate) {
-                   listCalendars.value[e].weeks[f].days[i].isHovered = false
+                    this.listCalendars[e].weeks[f].days[i].isHovered = false
                   }
 
                   if (this.checkSelDates('min', range.start, item.date, date)) {
-                   listCalendars.value[e].weeks[f].days[i].isMarked = true
+                    this.listCalendars[e].weeks[f].days[i].isMarked = true
 
                     let minDateToRight, minDateToLeft
                     minDateToLeft = new Date(startDate.getTime())
                     minDateToRight = new Date(startDate.getTime())
                     minDateToLeft.setDate(
-                      minDateToLeft.getDate() - fConfigs.value.minSelDays + 1
+                      minDateToLeft.getDate() - this.fConfigs.minSelDays + 1
                     )
                     minDateToRight.setDate(
-                      minDateToRight.getDate() + fConfigs.value.minSelDays - 1
+                      minDateToRight.getDate() + this.fConfigs.minSelDays - 1
                     )
 
                     if (
                       thisDate >= minDateToLeft.getTime() &&
-                      helpCalendar.value.formatDate(minDateToLeft) === item.date
+                      this.helpCalendar.formatDate(minDateToLeft) === item.date
                     ) {
-                     listCalendars.value[e].weeks[f].days[i].isMarked = false
-                     listCalendars.value[e].weeks[f].days[
+                      this.listCalendars[e].weeks[f].days[i].isMarked = false
+                      this.listCalendars[e].weeks[f].days[
                         i
                       ].isMouseToLeft = true
-                     listCalendars.value[e].weeks[f].days[i].isHovered = true
+                      this.listCalendars[e].weeks[f].days[i].isHovered = true
                     } else if (
                       thisDate <= minDateToRight.getTime() &&
-                      helpCalendar.value.formatDate(minDateToRight) === item.date
+                      this.helpCalendar.formatDate(minDateToRight) === item.date
                     ) {
-                     listCalendars.value[e].weeks[f].days[i].isMarked = false
-                     listCalendars.value[e].weeks[f].days[
+                      this.listCalendars[e].weeks[f].days[i].isMarked = false
+                      this.listCalendars[e].weeks[f].days[
                         i
                       ].isMouseToRight = true
-                     listCalendars.value[e].weeks[f].days[i].isHovered = true
+                      this.listCalendars[e].weeks[f].days[i].isHovered = true
                     }
                   }
 
                   if (this.checkSelDates('max', range.start, item.date, date)) {
-                   listCalendars.value[e].weeks[f].days[i].isMarked = false
-                   listCalendars.value[e].weeks[f].days[i].isHovered = false
-                   listCalendars.value[e].weeks[f].days[i].isMouseToLeft = false
-                   listCalendars.value[e].weeks[f].days[
+                    this.listCalendars[e].weeks[f].days[i].isMarked = false
+                    this.listCalendars[e].weeks[f].days[i].isHovered = false
+                    this.listCalendars[e].weeks[f].days[i].isMouseToLeft = false
+                    this.listCalendars[e].weeks[f].days[
                       i
                     ].isMouseToRight = false
 
@@ -1483,19 +1299,19 @@ const dayMouseOver = (date) => {
                     maxDateToLeft = new Date(startDate.getTime())
                     maxDateToRight = new Date(startDate.getTime())
                     maxDateToLeft.setDate(
-                      maxDateToLeft.getDate() - fConfigs.value.maxSelDays + 1
+                      maxDateToLeft.getDate() - this.fConfigs.maxSelDays + 1
                     )
                     maxDateToRight.setDate(
-                      maxDateToRight.getDate() + fConfigs.value.maxSelDays - 1
+                      maxDateToRight.getDate() + this.fConfigs.maxSelDays - 1
                     )
 
                     if (thisDate <= maxDateToLeft.getTime()) {
                       if (
-                        helpCalendar.value.formatDate(maxDateToLeft) ===
+                        this.helpCalendar.formatDate(maxDateToLeft) ===
                         item.date
                       ) {
-                       listCalendars.value[e].weeks[f].days[i].isHovered = true
-                       listCalendars.value[e].weeks[f].days[
+                        this.listCalendars[e].weeks[f].days[i].isHovered = true
+                        this.listCalendars[e].weeks[f].days[
                           i
                         ].isMouseToLeft = true
                       }
@@ -1503,11 +1319,11 @@ const dayMouseOver = (date) => {
 
                     if (thisDate >= maxDateToRight.getTime()) {
                       if (
-                        helpCalendar.value.formatDate(maxDateToRight) ===
+                        this.helpCalendar.formatDate(maxDateToRight) ===
                         item.date
                       ) {
-                       listCalendars.value[e].weeks[f].days[i].isHovered = true
-                       listCalendars.value[e].weeks[f].days[
+                        this.listCalendars[e].weeks[f].days[i].isHovered = true
+                        this.listCalendars[e].weeks[f].days[
                           i
                         ].isMouseToRight = true
                       }
@@ -1520,18 +1336,20 @@ const dayMouseOver = (date) => {
         }
         // })
       }
-}
-
-const PreMonth = (calendarKey = null) => {
+    },
+    /**
+     * @return {boolean}
+     */
+    PreMonth(calendarKey = null) {
       if (!this.allowPreDate) return false
 
       this.transitionPrefix = 'right'
 
-      const step = fConfigs.value.changeMonthStep
+      let step = this.fConfigs.changeMonthStep
 
       calendarKey = calendarKey !== null ? calendarKey : 0
 
-      const currentCalendar =listCalendars.value[calendarKey]
+      let currentCalendar = this.listCalendars[calendarKey]
       currentCalendar.date = new Date(
         currentCalendar.date.getFullYear(),
         currentCalendar.date.getMonth() - step
@@ -1539,24 +1357,26 @@ const PreMonth = (calendarKey = null) => {
       currentCalendar.key -= hUniqueID()
       this.updateCalendar()
 
-      if (!fConfigs.value.isSeparately) {
-        calendar.value.currentDate = currentCalendar.date
+      if (!this.fConfigs.isSeparately) {
+        this.calendar.currentDate = currentCalendar.date
         this.initCalendar()
       }
 
-      emit('changedMonth', currentCalendar.date)
-}
-
-const  NextMonth =(calendarKey = null)=> {
+      this.$emit('changedMonth', currentCalendar.date)
+    },
+    /**
+     * @return {boolean}
+     */
+    NextMonth(calendarKey = null) {
       if (!this.allowNextDate) return false
 
       this.transitionPrefix = 'left'
 
-      const step = fConfigs.value.changeMonthStep
+      let step = this.fConfigs.changeMonthStep
 
       calendarKey = calendarKey !== null ? calendarKey : 0
 
-      const currentCalendar =listCalendars.value[calendarKey]
+      let currentCalendar = this.listCalendars[calendarKey]
       currentCalendar.date = new Date(
         currentCalendar.date.getFullYear(),
         currentCalendar.date.getMonth() + step
@@ -1564,85 +1384,93 @@ const  NextMonth =(calendarKey = null)=> {
       currentCalendar.key += hUniqueID()
       this.updateCalendar()
 
-      if (!fConfigs.value.isSeparately) {
-        calendar.value.currentDate = currentCalendar.date
+      if (!this.fConfigs.isSeparately) {
+        this.calendar.currentDate = currentCalendar.date
         this.initCalendar()
       }
 
-      emit('changedMonth', currentCalendar.date)
-}
-
-const  PreYear =(calendarKey = null) =>{
+      this.$emit('changedMonth', currentCalendar.date)
+    },
+    /**
+     * @return {boolean}
+     */
+    PreYear(calendarKey = null) {
       if (!this.allowPreDate) return false
 
-      const step = showYearPicker.value ? fConfigs.value.changeYearStep : 1
+      let step = this.showYearPicker ? this.fConfigs.changeYearStep : 1
 
       calendarKey = calendarKey !== null ? calendarKey : 0
 
-      const currentCalendar =listCalendars.value[calendarKey]
+      let currentCalendar = this.listCalendars[calendarKey]
       currentCalendar.date = new Date(
         currentCalendar.date.getFullYear() - step,
         currentCalendar.date.getMonth()
       )
       this.updateCalendar()
 
-      if (!fConfigs.value.isSeparately) {
-        calendar.value.currentDate = currentCalendar.date
+      if (!this.fConfigs.isSeparately) {
+        this.calendar.currentDate = currentCalendar.date
         this.initCalendar()
       }
 
-      emit('changedYear', currentCalendar.date)
-}
-const  NextYear =(calendarKey = null)=> {
+      this.$emit('changedYear', currentCalendar.date)
+    },
+    /**
+     * @return {boolean}
+     */
+    NextYear(calendarKey = null) {
       if (!this.allowNextDate) return false
 
-      const step = showYearPicker.value ? fConfigs.value.changeYearStep : 1
+      let step = this.showYearPicker ? this.fConfigs.changeYearStep : 1
 
       calendarKey = calendarKey !== null ? calendarKey : 0
 
-      const currentCalendar =listCalendars.value[calendarKey]
+      let currentCalendar = this.listCalendars[calendarKey]
       currentCalendar.date = new Date(
         currentCalendar.date.getFullYear() + step,
         currentCalendar.date.getMonth()
       )
       this.updateCalendar()
 
-      if (!fConfigs.value.isSeparately) {
-        calendar.value.currentDate = currentCalendar.date
+      if (!this.fConfigs.isSeparately) {
+        this.calendar.currentDate = currentCalendar.date
         this.initCalendar()
       }
 
-      emit('changedYear', currentCalendar.date)
-}
-const  ChooseDate =(date) => {
-      let newDate = helpCalendar.value.getDateFromFormat(date)
+      this.$emit('changedYear', currentCalendar.date)
+    },
+    ChooseDate(date) {
+      let newDate = this.helpCalendar.getDateFromFormat(date)
 
       if (date === 'today') {
         newDate = new Date()
       }
 
-     listCalendars.value[0].date = calendar.value.currentDate = newDate
+      this.listCalendars[0].date = this.calendar.currentDate = newDate
 
       this.updateCalendar()
       this.initCalendar()
-}
-const  openMonthPicker = (key)=> {
-      if (fConfigs.value.changeMonthFunction) {
-        showMonthPicker.value = key === showMonthPicker.value ? false : key
-        showYearPicker.value = false
+    },
+    openMonthPicker(key) {
+      if (this.fConfigs.changeMonthFunction) {
+        this.showMonthPicker = key === this.showMonthPicker ? false : key
+        this.showYearPicker = false
       }
-}
-const  openYearPicker = (key) => {
-      if (fConfigs.value.changeYearFunction) {
-        showYearPicker.value = key === showYearPicker.value ? false : key
-        showMonthPicker.value = false
+    },
+    openYearPicker(key) {
+      if (this.fConfigs.changeYearFunction) {
+        this.showYearPicker = key === this.showYearPicker ? false : key
+        this.showMonthPicker = false
       }
-}
-const  pickMonth = (key, calendarKey)=> {
-      showMonthPicker.value = false
-      if (!props.isSeparately) {
-       listCalendars.value.forEach((currentCalendar, index) => {
-          const date = currentCalendar.date
+    },
+    openTimePicker() {
+      this.showTimePicker = true
+    },
+    pickMonth(key, calendarKey) {
+      this.showMonthPicker = false
+      if (!this.isSeparately) {
+        this.listCalendars.forEach((currentCalendar, index) => {
+          let date = currentCalendar.date
           currentCalendar.date = new Date(
             date.getFullYear(),
             key + 1 + index,
@@ -1651,83 +1479,89 @@ const  pickMonth = (key, calendarKey)=> {
           currentCalendar.key += hUniqueID()
         })
       } else {
-        const currentCalendar =listCalendars.value[calendarKey]
-        const date = currentCalendar.date
+        let currentCalendar = this.listCalendars[calendarKey]
+        let date = currentCalendar.date
         currentCalendar.date = new Date(date.getFullYear(), key + 1, 0)
         currentCalendar.key += hUniqueID()
       }
 
-      const currentCalendar =listCalendars.value[calendarKey]
-      emit('changedMonth', currentCalendar.date);
-      updateCalendar()
-}
-const  openTimePicker = ()=> {
-      this.showTimePicker = true
-}
-const  pickYear =(year, calendarKey) =>{
-      showYearPicker.value = false
-      if (!props.isSeparately) {
-       listCalendars.value.forEach(currentCalendar => {
-          const date = currentCalendar.date
+      let currentCalendar = this.listCalendars[calendarKey]
+      this.$emit('changedMonth', currentCalendar.date);
+      this.updateCalendar()
+    },
+    pickYear(year, calendarKey) {
+      this.showYearPicker = false
+      if (!this.isSeparately) {
+        this.listCalendars.forEach(currentCalendar => {
+          let date = currentCalendar.date
           currentCalendar.date = new Date(year, date.getMonth() + 1, 0)
           currentCalendar.key += hUniqueID()
-          emit('changedYear', currentCalendar.date)
+          this.$emit('changedYear', currentCalendar.date)
         })
       } else {
-        const currentCalendar =listCalendars.value[calendarKey]
-        const date = currentCalendar.date
+        let currentCalendar = this.listCalendars[calendarKey]
+        let date = currentCalendar.date
         currentCalendar.date = new Date(year, date.getMonth() + 1, 0)
         currentCalendar.key += hUniqueID()
-        emit('changedYear', currentCalendar.date)
+        this.$emit('changedYear', currentCalendar.date)
       }
-      updateCalendar()
-}
-const  getYearList = (date, delta) =>{
-      const years = []
-      const year = date.getFullYear() - 4 + delta
+      this.updateCalendar()
+    },
+    getYearList(date, delta) {
+      let years = []
+      let year = date.getFullYear() - 4 + delta
       for (let i = 0; i < 12; i++) {
-        const finalYear = year + i
+        let finalYear = year + i
 
         years.push({
           year: finalYear
         })
       }
       return years
-}
-const  addToSelectedDates=() =>{
-      if (helpCalendar.value.checkValidDate(calendar.value.selectedDatesItem)) {
-        const date = Object.assign({}, this.defaultDateFormat)
-        date.date = calendar.value.selectedDatesItem
-        calendar.value.selectedDates.push(date)
-        calendar.value.selectedDatesItem = ''
+    },
+    /**
+     * Add date to selectedDates list
+     * @param index
+     */
+    addToSelectedDates() {
+      if (this.helpCalendar.checkValidDate(this.calendar.selectedDatesItem)) {
+        let date = Object.assign({}, this.defaultDateFormat)
+        date.date = this.calendar.selectedDatesItem
+        this.calendar.selectedDates.push(date)
+        this.calendar.selectedDatesItem = ''
         this.markChooseDays()
       }
-}
-const  removeFromSelectedDates=(index)=> {
-      calendar.value.selectedDates.splice(index, 1)
+    },
+    /**
+     * Remove date from selectedDates list
+     * @param index
+     */
+    removeFromSelectedDates(index) {
+      this.calendar.selectedDates.splice(index, 1)
       this.markChooseDays()
-}
-const  checkDateRangeEnd =(date) => {
-      if (Array.isArray(fConfigs.value.markedDateRange)) {
+    },
+
+    checkDateRangeEnd(date) {
+      if (Array.isArray(this.fConfigs.markedDateRange)) {
         return (
-          fConfigs.value.markedDateRange.findIndex(range => {
+          this.fConfigs.markedDateRange.findIndex(range => {
             return range.end === date
           }) !== -1
         )
       }
 
-      return date === fConfigs.value.markedDateRange.end
-}
-const  checkSelDates = (type, startDate, itemDate, hoverDate)=> {
-      const startTime = helpCalendar.value.getDateFromFormat(startDate).getTime()
-      const itemTime = helpCalendar.value.getDateFromFormat(itemDate).getTime()
-      const hoverTime = helpCalendar.value.getDateFromFormat(hoverDate).getTime()
+      return date === this.fConfigs.markedDateRange.end
+    },
+    checkSelDates(type, startDate, itemDate, hoverDate) {
+      let startTime = this.helpCalendar.getDateFromFormat(startDate).getTime()
+      let itemTime = this.helpCalendar.getDateFromFormat(itemDate).getTime()
+      let hoverTime = this.helpCalendar.getDateFromFormat(hoverDate).getTime()
 
-      const days =
-        type === 'min' ? fConfigs.value.minSelDays : fConfigs.value.maxSelDays - 2
-      const minTime = days * 1000 * 60 * 60 * 24
-      const rightTime = startTime + minTime
-      const leftTime = startTime - minTime
+      let days =
+        type === 'min' ? this.fConfigs.minSelDays : this.fConfigs.maxSelDays - 2
+      let minTime = days * 1000 * 60 * 60 * 24
+      let rightTime = startTime + minTime
+      let leftTime = startTime - minTime
 
       let result
       if (hoverTime > startTime) {
@@ -1735,36 +1569,36 @@ const  checkSelDates = (type, startDate, itemDate, hoverDate)=> {
           result =
             itemTime < rightTime &&
             itemTime > startTime &&
-            fConfigs.value.minSelDays
+            this.fConfigs.minSelDays
         else
           result =
             itemTime > rightTime &&
             itemTime > startTime &&
-            fConfigs.value.maxSelDays
+            this.fConfigs.maxSelDays
       } else if (hoverTime < startTime) {
         if (type === 'min')
           result =
             itemTime > leftTime &&
             itemTime < startTime &&
-            fConfigs.value.minSelDays
+            this.fConfigs.minSelDays
         else
           result =
             itemTime < leftTime &&
             itemTime < startTime &&
-            fConfigs.value.maxSelDays
+            this.fConfigs.maxSelDays
       }
 
       return result
-}
-const  checkLimits =(value) => {
-      if (fConfigs.value.limits) {
-        const min = new Date(
-          helpCalendar.value.getDateFromFormat(fConfigs.value.limits.min)
+    },
+    checkLimits(value) {
+      if (this.fConfigs.limits) {
+        let min = new Date(
+          this.helpCalendar.getDateFromFormat(this.fConfigs.limits.min)
         )
         min.setDate(1)
         min.setHours(0, 0, 0, 0)
-        const max = new Date(
-          helpCalendar.value.getDateFromFormat(fConfigs.value.limits.max)
+        let max = new Date(
+          this.helpCalendar.getDateFromFormat(this.fConfigs.limits.max)
         )
         max.setDate(1)
         max.setHours(0, 0, 0, 0)
@@ -1772,7 +1606,7 @@ const  checkLimits =(value) => {
         this.allowPreDate = true
         this.allowNextDate = true
 
-        const current = new Date(value)
+        let current = new Date(value)
         current.setDate(1)
         current.setHours(0, 0, 0, 0)
 
@@ -1784,9 +1618,9 @@ const  checkLimits =(value) => {
           this.allowNextDate = false
         }
       }
-}
-const  getTransition_ =()=>{
-      if (!fConfigs.value.transition) return ''
+    },
+    getTransition_() {
+      if (!this.fConfigs.transition) return ''
 
       let name = ''
       if (this.transitionPrefix === 'left') {
@@ -1795,170 +1629,71 @@ const  getTransition_ =()=>{
         name = 'vfc-calendar-slide-right'
       }
       return name
-}
-
-const checkHiddenElement = (elementName) => 
-  !fConfigs.value.hiddenElements.includes(elementName)
-
-const onFocusIn = () => {
-  if (fConfigs.value.isModal) {
-    showCalendar.value = true
-  }
-}
-
-const onFocusOut = (e) => {
-  if (
-    fConfigs.value.isModal &&
-    !hElContains(popoverElement, e.relatedTarget)
-  ) {
-    showCalendar.value = showMonthPicker.value = showYearPicker.value = false
-    return
-  }
-}
-
-const hideMonthYearPicker = (e) => {
-  if (showMonthPicker.value || showYearPicker.value) {
-    const key = showMonthPicker.value
-      ? showMonthPicker.value - 1
-      : showYearPicker.value - 1
-
-    const MYactive = refs.calendars.value.querySelectorAll(
-      `.vfc-content-MY-picker`
-    )[key]
-    if (MYactive.contains(e.target)) {
-      return
-    }
-    showMonthPicker.value = showYearPicker.value = false
-    return
-  }
-}
-
-const checkDateRangeStart = (date) => {
-  if (Array.isArray(fConfigs.value.markedDateRange)) {
-    return (
-      fConfigs.value.markedDateRange.findIndex(range => {
-        return range.start === date
-      }) !== -1
-    )
-  }
-
-  return date === fConfigs.value.markedDateRange.start
-}
-
-const cleanRange = () => {
-  if (props.isMultipleDateRange) {
-    calendar.value.dateRange.end = ''
-    calendar.value.dateRange.start = ''
-    return
-  }
-  calendar.value.multipleDateRange = []
-}
-
-watch(
-  () => props.enabledDates,
-  () => {
-    fConfigs.value.enabledDates = props.enabledDates;
-  },
-  { deep: true }
-);
-watch(
-  () => props.configs.enabledDates,
-  () => {
-    fConfigs.value.enabledDates = props.configs.enabledDates;
-  },
-  { deep: true }
-);
-watch(
-  () => fConfigs.value,
-  () => {
-    markChooseDays();
-  },
-  { deep: true, immediate: true }
-);
-watch(
-  () => calendar.value,
-  () => {
-    markChooseDays();
-  },
-  { deep: true, immediate: true }
-);
-watch(
-  () => calendar.value.currentDate,
-  (value) => {
-    emit("input", calendar.value);
-    checkLimits(value);
-  }
-);
-
-onMounted(() => {
-  setConfigs();
-  initCalendar();
-
-  // show time placeholder
-  if (props.displayTimeInput) {
-    const timeFormat = fConfigs.value.placeholder.split(' ')[1];
-    if (!timeFormat) {
-      fConfigs.value.placeholder += ' hh:mm';
-    }
-  }
-
-  // Event
-  popoverElement.value!.addEventListener('focusin', onFocusIn);
-  popoverElement.value!.addEventListener('focusout', onFocusOut);
-  window.addEventListener('click', hideMonthYearPicker, {
-    capture: true
-  });
-
-  // Reacts to external selected dates
-  watch(
-    () => props.value,
-    value => {
-      if (
-        typeof value === 'object' &&
-        (value.hasOwnProperty('dateRange') ||
-          value.hasOwnProperty('selectedDate'))
-      ) {
-        calendar.value = value as any;
-      } else if (
-        typeof value === 'object' &&
-        value.hasOwnProperty('multipleDateRange')
-      ) {
-        calendar.value.multipleDateRange = value.multipleDateRange;
-        const lastElement = calendar.value.multipleDateRange[
-          Math.max(0, calendar.value.multipleDateRange.length - 1)
-        ] as any;
-        if (
-          lastElement &&
-          ((lastElement.start && !lastElement.end) ||
-            (!lastElement.start && lastElement.end))
-        ) {
-          throw new Error('Invalid Data Range');
-        }
+    },
+    checkHiddenElement(elementName) {
+      return !this.fConfigs.hiddenElements.includes(elementName)
+    },
+    onFocusIn() {
+      if (this.fConfigs.isModal) {
+        this.showCalendar = true
       }
     },
-    { immediate: true, deep: true }
-  );
-
-  watch(
-    () => showCalendar,
-    value => {
-      if (value)  emit('opened');
-      else emit('closed');
+    onFocusOut(e) {
+      if (
+        this.fConfigs.isModal &&
+        !hElContains(this.popoverElement, e.relatedTarget)
+      ) {
+        return (this.showCalendar = this.showMonthPicker = this.showYearPicker = false)
+      }
     },
-    { immediate: true, deep: true }
-  );
-})
-onUnmounted(
-  ()=>{
-        window.removeEventListener('focusin', onFocusIn)
-    window.removeEventListener('focusout', onFocusOut)
-    window.removeEventListener('click', hideMonthYearPicker)
+
+    hideMonthYearPicker(e) {
+      this.$nextTick(() => {
+        if (this.showMonthPicker || this.showYearPicker) {
+          let key = this.showMonthPicker
+            ? this.showMonthPicker - 1
+            : this.showYearPicker - 1
+
+          const MYactive = this.$refs.calendars.querySelectorAll(
+            `.vfc-content-MY-picker`
+          )[key]
+          if (MYactive.contains(e.target)) {
+            return
+          }
+          return (this.showMonthPicker = this.showYearPicker = false)
+        }
+      })
+    },
+
+    checkDateRangeStart(date) {
+      if (Array.isArray(this.fConfigs.markedDateRange)) {
+        return (
+          this.fConfigs.markedDateRange.findIndex(range => {
+            return range.start === date
+          }) !== -1
+        )
+      }
+
+      return date === this.fConfigs.markedDateRange.start
+    },
+    cleanRange() {
+      if (!this.isMultipleDateRange) {
+        this.calendar.dateRange.end = ''
+        this.calendar.dateRange.start = ''
+        return
+      }
+      this.calendar.multipleDateRange = []
+      // this.calendar.multipleDateRange.push({
+      //   start: '',
+      //   end: ''
+      // })
+    }
   }
-)
+}
 </script>
 
 <style lang="scss">
-@import "../assets/scss/calendar.scss";
+@import '../assets/scss/calendar.scss';
 .rangeCleaner {
   padding: 5px 0 10px;
   display: flex;
