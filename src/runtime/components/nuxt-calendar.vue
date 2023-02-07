@@ -1794,6 +1794,62 @@ const  getTransition_ =()=>{
       return name
 }
 
+const checkHiddenElement = (elementName) => 
+  !fConfigs.value.hiddenElements.includes(elementName)
+
+const onFocusIn = () => {
+  if (fConfigs.value.isModal) {
+    showCalendar.value = true
+  }
+}
+
+const onFocusOut = (e) => {
+  if (
+    fConfigs.value.isModal &&
+    !hElContains(popoverElement, e.relatedTarget)
+  ) {
+    showCalendar.value = showMonthPicker.value = showYearPicker.value = false
+    return
+  }
+}
+
+const hideMonthYearPicker = (e) => {
+  if (showMonthPicker.value || showYearPicker.value) {
+    const key = showMonthPicker.value
+      ? showMonthPicker.value - 1
+      : showYearPicker.value - 1
+
+    const MYactive = refs.calendars.value.querySelectorAll(
+      `.vfc-content-MY-picker`
+    )[key]
+    if (MYactive.contains(e.target)) {
+      return
+    }
+    showMonthPicker.value = showYearPicker.value = false
+    return
+  }
+}
+
+const checkDateRangeStart = (date) => {
+  if (Array.isArray(fConfigs.value.markedDateRange)) {
+    return (
+      fConfigs.value.markedDateRange.findIndex(range => {
+        return range.start === date
+      }) !== -1
+    )
+  }
+
+  return date === fConfigs.value.markedDateRange.start
+}
+
+const cleanRange = () => {
+  if (!isMultipleDateRange.value) {
+    calendar.value.dateRange.end = ''
+    calendar.value.dateRange.start = ''
+    return
+  }
+  calendar.value.multipleDateRange = []
+}
 
 watch(
   () => this.enabledDates,
