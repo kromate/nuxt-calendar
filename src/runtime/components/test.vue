@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 
+
+
 methods: {
     checkHiddenElement(elementName) {
       return !this.fConfigs.hiddenElements.includes(elementName)
