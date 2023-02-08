@@ -2230,7 +2230,7 @@ const initializeComponent = async (elm, hostRef, cmpMeta, hmrVersionId, Cstr) =>
                     BUILD.shadowDom &&
                     BUILD.shadowDomShim &&
                     cmpMeta.$flags$ & 8 /* CMP_FLAGS.needsShadowDomShim */) {
-                    style = await import('./shadow-css-b18e99d7.js').then((m) => m.scopeCss(style, scopeId, false));
+                    style = await import('./shadow-css.js').then((m) => m.scopeCss(style, scopeId, false));
                 }
                 registerStyle(scopeId, style, !!(cmpMeta.$flags$ & 1 /* CMP_FLAGS.shadowDomEncapsulation */));
                 endRegisterStyles();

@@ -1,5 +1,5 @@
-import { B as BUILD, c as consoleDevInfo, p as plt, w as win, H, d as doc, N as NAMESPACE, a as promiseResolve, b as bootstrapLazy } from './index-50386920.js';
-import { g as globalScripts } from './app-globals-0f993ce5.js';
+import { B as BUILD, c as consoleDevInfo, p as plt, w as win, H, d as doc, N as NAMESPACE, a as promiseResolve, b as bootstrapLazy } from './index.js';
+import { g as globalScripts } from './app-globals.js';
 
 /*
  Stencil Client Patch Browser v2.18.1 | MIT Licensed | https://stenciljs.com
@@ -61,7 +61,7 @@ const patchBrowser = () => {
         if (BUILD.dynamicImportShim && !win.customElements) {
             // module support, but no custom elements support (Old Edge)
             // @ts-ignore
-            return import(/* webpackChunkName: "polyfills-dom" */ './dom-665d6011.js').then(() => opts);
+            return import(/* webpackChunkName: "polyfills-dom" */ './dom.js').then(() => opts);
         }
     }
     return promiseResolve(opts);
