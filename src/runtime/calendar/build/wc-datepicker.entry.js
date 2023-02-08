@@ -1,4 +1,4 @@
-import { r as registerInstance, e as createEvent, h, f as Host, g as getElement } from './index.js';
+import { r as registerInstance, e as createEvent, h, f as Host, g as getElement } from './index';
 
 function addDays(date, days) {
   const newDate = new Date(date);
