@@ -5,6 +5,14 @@
     :disabled='disabled'
     :disableDate='disableDate'
     :element-class-name='element_class_name'
+    :first-day-of-week='first_day_of_week'
+    :labels='labels'
+    :locale='locale'
+    :show-clear-button='show_clear_button'
+    :show-month-stepper	='show_month_stepper'
+    :show-today-button='show_today_button'
+    :show-year-stepper='show_year_stepper'
+    :start-date='start_date'
     >
   </wc-datepicker>
 </template>
@@ -14,25 +22,10 @@
 import { onMounted } from "vue";
 import "../calendar/build/wc-datepicker.esm";
 import '../calendar/themes/light.css'
-
+import props from './props'
 
 defineProps({
-  range: {
-    type: Boolean,
-    default: false,
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
-  disableDate: {
-    type: Function,
-    default: () => false,
-  },
-  element_class_name: {
-    type: String,
-    default: 'wc-datepicker',
-  },
+...props
 });
 onMounted(() => {
   const datepicker = document.getElementById('datepicker') as any;

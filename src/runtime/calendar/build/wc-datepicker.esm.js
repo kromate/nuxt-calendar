@@ -8,7 +8,7 @@ const getDynamicImportFunction = (namespace) => `__sc_import_${namespace.replace
 const patchBrowser = () => {
     // NOTE!! This fn cannot use async/await!
     if (BUILD.isDev && !BUILD.isTesting) {
-        consoleDevInfo('Running in development mode.');
+        // consoleDevInfo('Running in development mode.');
     }
     if (BUILD.cssVarShim) {
         // shim css vars

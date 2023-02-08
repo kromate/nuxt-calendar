@@ -16,6 +16,7 @@ export default defineNuxtModule<ModuleOptions>({
     addComponent({
       name: "NuxtCalendar",
       filePath: resolver.resolve("./runtime/components/nuxt-calendar"),
+      mode: "client",
     });
   },
 });
