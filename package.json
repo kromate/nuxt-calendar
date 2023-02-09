@@ -1,7 +1,7 @@
 {
-  "name": "my-module",
-  "version": "1.0.0",
-  "description": "My new Nuxt module",
+  "name": "nuxt-calender",
+  "version": "0.0.8",
+  "description": "Nuxt calendar module built using wc-calendar as base",
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "@nuxt/kit": "^3.1.2",
-    "sass": "^1.58.0"
+    "sass": "^1.58.0",
+     "@stencil/core": "^2.13.0"
   },
   "devDependencies": {
     "@nuxt/eslint-config": "^0.1.1",
